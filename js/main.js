@@ -24,7 +24,14 @@ let login = localStorage.getItem('foodDelivery');
 
 
 function toggleModalAuth() {
-    modalAuth.classList.toggle('is-open')
+    modalAuth.classList.toggle('is-open');
+    loginInput.style.borderColor = '';
+    logInForm.reset();
+    if (modalAuth.classList.contains('is-open')) {
+        disableScroll();
+    } else {
+        enableScroll();
+    }
 }
 
 function authorized() {
@@ -40,7 +47,6 @@ function authorized() {
         checkAuth();
     }
     userName.innerHTML = login;
-
     buttonAuth.style.display = 'none';
     userName.style.display = 'inline';
     buttonOut.style.display = 'block';
@@ -52,10 +58,10 @@ function noAuthorized() {
 
     function logIn(event) {
         event.preventDefault();
-        login = loginInput.value;
-        if (loginInput.value) {
+        if (loginInput.value.trim()) {
+            login = loginInput.value;
             toggleModalAuth();
-            localStorage.setItem('foodDelivery', login)
+            localStorage.setItem('foodDelivery', login);
             buttonAuth.removeEventListener('click', toggleModalAuth);
             closeAuth.removeEventListener('click', toggleModalAuth);
             logInForm.removeEventListener('submit', logIn);
@@ -63,26 +69,17 @@ function noAuthorized() {
             checkAuth();
         } else {
             loginInput.style.borderColor = 'red';
-            console.log('Введите пароль');
-
+            loginInput.value = '';
         }
-
     }
     buttonAuth.addEventListener('click', toggleModalAuth);
     closeAuth.addEventListener('click', toggleModalAuth);
     logInForm.addEventListener('submit', logIn);
-
-
-
-
-
-    // if (login !== null) {
-    //    
-    //     console.log('good');
-
-    // } else {
-
-    // }
+    modalAuth.addEventListener('click', function(e) {
+        if (e.target.classList.contains('is-open')) {
+            toggleModalAuth();
+        }
+    })
 }
 
 function checkAuth() {
