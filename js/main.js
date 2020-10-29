@@ -19,21 +19,30 @@ const restaurants = document.querySelector('.restaurants');
 const menu = document.querySelector('.menu');
 const logo = document.querySelector('.logo');
 const cardsMenu = document.querySelector('.cards-menu');
+const sectionHeading = document.querySelector('.section-heading');
 
 let login = localStorage.getItem('foodDelivery');
 let password = localStorage.getItem('passPeople');
 
-function validName(str) {
+const getData = async function(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Ошибка по адрессу ${url}, статус ошибки ${response.status}`)
+    }
+    return await response.json();
+};
+
+const validName = function(str) {
     const regName = /^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$/;
     return regName.test(str);
-}
+};
 
-function validPassword(str) {
+const validPassword = function(str) {
     const regPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).*$/;
     return regPassword.test(str);
-}
+};
 
-function toggleModalAuth() {
+const toggleModalAuth = function() {
     modalAuth.classList.toggle('is-open');
     loginInput.style.borderColor = '';
     logInForm.reset();
@@ -42,11 +51,17 @@ function toggleModalAuth() {
     } else {
         enableScroll();
     }
-}
+};
 
-function toggleModal() {
+const toggleModal = function() {
     modal.classList.toggle("is-open");
-}
+};
+
+function home() {
+    containerPromo.classList.remove('hide');
+    restaurants.classList.remove('hide');
+    menu.classList.add('hide');
+};
 
 function authorized() {
     function logOut() {
@@ -90,10 +105,6 @@ function noAuthorized() {
             loginInput.value = '';
         }
     }
-
-
-    cartButton.addEventListener("click", toggleModal);
-    close.addEventListener("click", toggleModal);
     buttonAuth.addEventListener('click', toggleModalAuth);
     closeAuth.addEventListener('click', toggleModalAuth);
     logInForm.addEventListener('submit', logIn);
@@ -101,8 +112,8 @@ function noAuthorized() {
         if (e.target.classList.contains('is-open')) {
             toggleModalAuth();
         }
-    })
-}
+    });
+};
 
 function checkAuth() {
     if (login) {
@@ -111,41 +122,74 @@ function checkAuth() {
         noAuthorized();
     }
 };
-//day2
 
-function createCardsRestaurant() {
+function createCardInfo(info) {
+    console.log(info);
+    const card = document.createElement('div');
+    card.className = 'section-heading';
+    card.insertAdjacentHTML('afterbegin', `
+    <div class="section-heading" data-info = "info">
+    <h2 class="section-title restaurant-title" >Пицца Плюс</h2>
+                    <div class="card-info">
+                        <div class="rating">
+                            4.5
+                        </div>
+                        <div class="price">От 900 ₽</div>
+                        <div class="category">Пицца</div>
+                    </div>
+                    </div>
+    `)
+    cardsMenu.insertAdjacentElement("beforebegin", card)
+}
+
+function createCardsRestaurant(restaurant) {
+    const {
+        image,
+        kitchen,
+        name,
+        price,
+        products,
+        stars,
+        time_of_delivery: timeOfDelivery
+    } = restaurant;
     const card = `
-  <a class="card card-restaurant">
-                        <img src="img/pizza-plus/preview.jpg" alt="image" class="card-image" />
+  <a class="card card-restaurant" data-products="${products}">
+                        <img src="${image}" alt="image" class="card-image" />
                         <div class="card-text">
                             <div class="card-heading">
-                                <h3 class="card-title">Пицца плюс</h3>
-                                <span class="card-tag tag">50 мин</span>
+                                <h3 class="card-title">${name}</h3>
+                                <span class="card-tag tag">${timeOfDelivery}</span>
                             </div>
                             <div class="card-info">
-                                <div class="rating">
-                                    4.5
-                                </div>
-                                <div class="price">От 900 ₽</div>
-                                <div class="category">Пицца</div>
+                                <div class="rating">${stars}</div>
+                                <div class="price">От ${price}</div>
+                                <div class="category">${kitchen}</div>
                             </div>
                         </div>
                     </a>
   `;
-    cardsRestaurants.insertAdjacentHTML('afterbegin', card)
+    cardsRestaurants.insertAdjacentHTML('afterbegin', card);
 };
 
-function createCardGood() {
+function createCardGood(good) {
+    const {
+        id,
+        name,
+        description,
+        price,
+        image,
+    } = good;
+    console.log(good);
     const card = document.createElement('div');
     card.className = 'card';
     card.insertAdjacentHTML('beforeend', `
-                         <img src="img/pizza-plus/pizza-classic.jpg" alt="image" class="card-image" />
+                         <img src=${image} alt="image" class="card-image" />
                         <div class="card-text">
                             <div class="card-heading">
-                                <h3 class="card-title card-title-reg">Пицца Классика</h3>
+                                <h3 class="card-title card-title-reg">${name}</h3>
                             </div>
                             <div class="card-info">
-                                <div class="ingredients">Соус томатный, сыр «Моцарелла», сыр «Пармезан», ветчина, салями, грибы.
+                                <div class="ingredients">${description}
                                 </div>
                             </div>
                             <div class="card-buttons">
@@ -153,12 +197,15 @@ function createCardGood() {
 									<span class="button-card-text">В корзину</span>
 									<span class="button-cart-svg"></span>
 								</button>
-                                <strong class="card-price-bold">510 ₽</strong>
+                                <strong class="card-price-bold">${price} ₽</strong>
                             </div>
                         </div>
    `);
-    cardsMenu.insertAdjacentElement('afterbegin', card);
-}
+    cardsMenu.insertAdjacentElement('beforeend', card);
+    // const info = document.createElement('div');
+    // info.className = 'section-heading';
+    // info.insertAdjacentHTML = ('')
+};
 
 function openGoods(e) {
     const target = e.target;
@@ -166,46 +213,47 @@ function openGoods(e) {
     toggleModalAuth();
     if (login) {
         if (restaurant) {
-            console.log('++++');
             containerPromo.classList.add('hide');
             restaurants.classList.add('hide');
             menu.classList.remove('hide');
+            // sectionHeading.textContent = '';
             cardsMenu.textContent = '';
-            createCardGood();
-            createCardGood();
-            createCardGood();
-            createCardGood();
+            getData(`./db/${restaurant.dataset.products}`).then(function(data) {
+                data.forEach(createCardGood)
+            });
+
             toggleModalAuth();
+            createCardInfo();
+
+
+
         }
     }
-}
-cardsRestaurants.addEventListener('click', openGoods);
+};
 
-function home() {
-    containerPromo.classList.remove('hide');
-    restaurants.classList.remove('hide');
-    menu.classList.add('hide');
-}
-logo.addEventListener('click', home);
 
-checkAuth();
+function init() {
+    getData('./db/partners.json').then(function(data) {
+        data.forEach(createCardsRestaurant);
+    });
 
-createCardsRestaurant();
-createCardsRestaurant();
-createCardsRestaurant();
-createCardsRestaurant();
+    cartButton.addEventListener("click", toggleModal);
+    close.addEventListener("click", toggleModal);
+    cardsRestaurants.addEventListener('click', openGoods);
+    logo.addEventListener('click', home);
 
-//slider
+    checkAuth();
 
-new Swiper('.swiper-container', {
-    sliderPerView: 1,
-    loop: true,
-    autoplay: true,
-    effect: 'coverflow',
-    grabCursor: true,
-    pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-    }
-});
-console.log(Swiper);
+    new Swiper('.swiper-container', {
+        sliderPerView: 1,
+        loop: true,
+        // autoplay: true,
+        effect: 'coverflow',
+        grabCursor: true,
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        }
+    });
+};
+init();
