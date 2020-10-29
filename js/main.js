@@ -50,9 +50,12 @@ function authorized() {
   userName.style.display = 'inline';
   buttonOut.style.display = 'block';
   buttonOut.addEventListener('click', logOut);
+  console.log('avtorizovan');
 };
 
 function noAuthorized() {
+  console.log('ne avtorizovan');
+
   function logIn(event) {
     event.preventDefault();
     if (loginInput.value.trim()) {
@@ -64,6 +67,7 @@ function noAuthorized() {
       logInForm.removeEventListener('submit', logIn);
       logInForm.reset();
       checkAuth();
+
     } else {
       loginInput.style.borderColor = 'red';
       loginInput.value = '';
@@ -141,17 +145,21 @@ function createCardGood() {
 
 function openGoods(e) {
   const target = e.target;
-  const restaurant = target.closest('.card-restaurant')
-
-  if (restaurant) {
-    containerPromo.classList.add('hide');
-    restaurants.classList.add('hide');
-    menu.classList.remove('hide');
-    cardsMenu.textContent = '';
-    createCardGood();
-    createCardGood();
-    createCardGood();
-    createCardGood();
+  const restaurant = target.closest('.card-restaurant');
+  toggleModalAuth();
+  if (login) {
+    if (restaurant) {
+      console.log('++++');
+      containerPromo.classList.add('hide');
+      restaurants.classList.add('hide');
+      menu.classList.remove('hide');
+      cardsMenu.textContent = '';
+      createCardGood();
+      createCardGood();
+      createCardGood();
+      createCardGood();
+      toggleModalAuth();
+    }
   }
 }
 cardsRestaurants.addEventListener('click', openGoods);
