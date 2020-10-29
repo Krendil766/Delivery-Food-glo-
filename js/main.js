@@ -1,4 +1,5 @@
 'use strict'
+import Swiper from 'https://unpkg.com/swiper/swiper-bundle.esm.browser.min.js'
 
 //day one
 const cartButton = document.querySelector("#cart-button");
@@ -177,3 +178,9 @@ createCardsRestaurant();
 createCardsRestaurant();
 createCardsRestaurant();
 createCardsRestaurant();
+
+//slider
+
+new Swiper ('.swiper-container', {
+});
+console.log(Swiper);
